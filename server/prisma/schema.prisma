@@ -1,0 +1,307 @@
+generator client {
+  provider = "prisma-client-js"
+  // output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  // url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  passwordHash String?  @map("password_hash")
+  avatarUrl    String?  @map("avatar_url")
+  googleId     String?  @map("google_id")
+
+  organizations        Organization[]
+  workspaceMembers     Workspace_Member[]
+  workspacesCreated    Workspace[]          @relation("WorkspaceCreatedBy")
+  projectsCreated      Project[]            @relation("ProjectsCreatedBy")
+  tasksCreated         Task[]               @relation("TasksCreatedBy")
+  tasksAssigned        Task[]               @relation("TasksAssignedTo")
+  comments             Comment[]
+  attachments          Attachment[]
+  notifications        Notification[]       @relation("NotificationReceiver")
+  notificationsTriggered Notification[]     @relation("NotificationActor")
+  activityLogs         ActivityLog[]
+  organizationMembers Organization_Member[]
+
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  @@map("users")
+}
+
+enum OrgRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+model Organization {
+  id      String  @id @default(uuid())
+  name    String
+  slug    String  @unique
+  logoUrl String? @map("logo_url")
+
+  owner    User   @relation(fields: [ownerId], references: [id])
+  ownerId  String @map("owner_id")
+
+  workspaces         Workspace[]
+  organizationMembers Organization_Member[]
+
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  @@map("organizations")
+}
+
+model Organization_Member {
+  id     String @id @default(uuid())
+  role   OrgRole @default(MEMBER)
+
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  organizationId String       @map("organization_id")
+  user           User         @relation(fields: [userId], references: [id])
+  userId         String       @map("user_id")
+
+  joinedAt DateTime @default(now()) @map("joined_at")
+
+  @@unique([organizationId, userId])
+  @@map("organization_members")
+}
+
+enum WorkspaceRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+model Workspace {
+  id    String  @id @default(uuid())
+  name  String
+  slug  String
+  color String?
+
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  organizationId String       @map("organization_id")
+
+  createdBy   User   @relation("WorkspaceCreatedBy", fields: [createdById], references: [id])
+  createdById String @map("created_by")
+
+  projects         Project[]
+  workspaceMembers Workspace_Member[]
+  labels           Label[]
+  tasks            Task[]             
+  notifications    Notification[]    
+  activityLogs     ActivityLog[] 
+
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  @@unique([organizationId, slug])
+  @@map("workspaces")
+}
+
+model Workspace_Member {
+  id   String @id @default(uuid())
+  role WorkspaceRole @default(MEMBER)
+
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  workspaceId String    @map("workspace_id")
+  user        User      @relation(fields: [userId], references: [id])
+  userId      String    @map("user_id")
+
+  joinedAt DateTime @default(now()) @map("joined_at")
+
+  @@unique([workspaceId, userId])
+  @@map("workspace_members")
+}
+
+model Project {
+  id          String  @id @default(uuid())
+  name        String
+  description String?
+  color       String?
+
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  workspaceId String    @map("workspace_id")
+
+  createdBy   User   @relation("ProjectsCreatedBy", fields: [createdById], references: [id])
+  createdById String @map("created_by")
+
+  tasks Task[]
+
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  @@map("projects")
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  IN_REVIEW
+  DONE
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+model Task {
+  id          String    @id @default(uuid())
+  title       String
+  description String?
+  status      TaskStatus   @default(TODO)
+  priority    TaskPriority @default(MEDIUM)
+  position    Float     @default(0)
+  dueDate     DateTime? @map("due_date")
+
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])  
+  workspaceId String    @map("workspace_id")                                 
+
+  project   Project @relation(fields: [projectId], references: [id])
+  projectId String  @map("project_id")
+
+  parentTask   Task?   @relation("SubTasks", fields: [parentTaskId], references: [id])
+  parentTaskId String? @map("parent_task_id")
+  subTasks     Task[]  @relation("SubTasks")
+
+  assignee   User?   @relation("TasksAssignedTo", fields: [assigneeId], references: [id])
+  assigneeId String? @map("assignee_id")
+
+  createdBy   User   @relation("TasksCreatedBy", fields: [createdById], references: [id])
+  createdById String @map("created_by")
+
+  labels       Task_Label[]
+  comments     Comment[]
+  attachments  Attachment[]
+  activityLogs ActivityLog[]
+
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  @@map("tasks")
+}
+
+model Label {
+  id    String @id @default(uuid())
+  name  String
+  color String
+
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  workspaceId String    @map("workspace_id")
+
+  tasks Task_Label[]
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  @@map("labels")
+}
+
+model Task_Label {
+  task    Task   @relation(fields: [taskId], references: [id])
+  taskId  String @map("task_id")
+  label   Label  @relation(fields: [labelId], references: [id])
+  labelId String @map("label_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@id([taskId, labelId])
+  @@map("task_labels")
+}
+
+model Comment {
+  id   String @id @default(uuid())
+  body String
+
+  task   Task   @relation(fields: [taskId], references: [id])
+  taskId String @map("task_id")
+
+  author   User   @relation(fields: [authorId], references: [id])
+  authorId String @map("author_id")
+
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  @@map("comments")
+}
+
+model Attachment {
+  id        String @id @default(uuid())
+  filename  String
+  url       String
+  sizeBytes Int    @map("size_bytes")
+
+  task   Task   @relation(fields: [taskId], references: [id])
+  taskId String @map("task_id")
+
+  uploadedBy   User   @relation(fields: [uploadedById], references: [id])
+  uploadedById String @map("uploaded_by")
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  @@map("attachments")
+}
+
+model Notification {
+  id     String    @id @default(uuid())
+  type   String
+  payload Json
+  read   Boolean   @default(false)
+  readAt DateTime? @map("read_at")
+
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])  
+  workspaceId String    @map("workspace_id")                              
+
+  receiver   User   @relation("NotificationReceiver", fields: [receiverId], references: [id])
+  receiverId String @map("user_id")
+
+  actor   User   @relation("NotificationActor", fields: [actorId], references: [id])
+  actorId String @map("actor_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("notifications")
+}
+
+model ActivityLog {
+  id     String @id @default(uuid())
+  action String
+  before Json?
+  after  Json?
+
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])  
+  workspaceId String    @map("workspace_id")                                
+
+  task   Task   @relation(fields: [taskId], references: [id])
+  taskId String @map("task_id")
+
+  actor   User   @relation(fields: [actorId], references: [id])
+  actorId String @map("actor_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("activity_logs")
+}
