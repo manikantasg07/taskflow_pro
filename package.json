@@ -14,7 +14,8 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --write",
     "prepare": "husky",
-    "dev:server": "npm run dev -w server"
+    "dev:server": "npm run dev -w server",
+    "typecheck": "tsc --noEmit -p server/tsconfig.json"
   },
   "lint-staged": {
     "**/*.{ts,tsx}": [

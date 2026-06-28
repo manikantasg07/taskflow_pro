@@ -1,0 +1,33 @@
+name: CI
+on:
+  pull_request:
+    branches: [main]
+    types: [opened,synchronize]
+  push:
+    branches: [main]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      SERVER_PORT: ${{ secrets.SERVER_PORT }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install nodejs
+        uses: actions/setup-node@v6
+        with: 
+          node-version: 22
+
+      - name: Install dependenices
+        run: npm ci
+
+      - name: Generate Prisma Client for type testing
+        run:  npm run prisma:generate -w server
+        
+      - name: Run linter
+        run: npm run lint
+      - name: Runnnig Tyope check
+        run: npm run typecheck
