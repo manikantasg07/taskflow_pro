@@ -12,7 +12,14 @@ export default defineConfig([
     extends: ["js/recommended"],
     rules: {
       "prettier/prettier": "error",
-      "no-unused-vars": "error",
+      // "no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        {
+          // use TS version ✅
+          argsIgnorePattern: "^_", // ignore _next, _req etc
+        },
+      ],
       "no-console": "warn",
     },
   },
