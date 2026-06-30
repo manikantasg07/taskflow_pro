@@ -5,7 +5,7 @@ import { AppError } from "./lib/AppError";
 import errorHandler from "./middleware/errorHandler";
 import rateLimit from "express-rate-limit";
 import { Request, Response, NextFunction } from "express";
-import { ErrorCodes } from "../../shared/src/ErrorCodes";
+import { ErrorCodes } from "shared";
 
 const limiter = rateLimit({
   windowMs: 2 * 60 * 1000,

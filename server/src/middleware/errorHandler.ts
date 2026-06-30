@@ -1,4 +1,4 @@
-import { ErrorCodes } from "../../../shared/src/ErrorCodes";
+import { ErrorCodes } from "shared";
 
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/client";
 import { Request, Response, NextFunction } from "express";
