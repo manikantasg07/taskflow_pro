@@ -3,6 +3,7 @@ import { ErrorCodes } from "shared";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/client";
 import { Request, Response, NextFunction } from "express";
 import { AppError } from "../lib/AppError";
+import { logger } from "../lib/logger";
 
 const errorHandler = async (
   error: AppError,
@@ -10,9 +11,16 @@ const errorHandler = async (
   res: Response,
   _next: NextFunction,
 ) => {
-  let statusCode = error.statusCode || 500;
-  let message = error.message || "Something Went Wrong";
-  let code = error.code || ErrorCodes.INTERNAL;
+  let statusCode = error.statusCode ?? 500;
+  let message = error.message ?? "Something Went Wrong";
+  let code = error.code ?? ErrorCodes.INTERNAL;
+
+  //if it is a program error
+  if (!error.isOperational) {
+    statusCode = 500;
+    message = "Something Went Wrong";
+    code = ErrorCodes.INTERNAL;
+  }
 
   //handling prisma errors
   if (error instanceof PrismaClientKnownRequestError) {
@@ -39,7 +47,7 @@ const errorHandler = async (
       }
     }
   }
-  console.error("Error", error);
+  logger.error(error);
   return res.status(statusCode).json({
     success: false,
     error: {
