@@ -1,15 +1,13 @@
 import express from "express";
-import dotenv from "dotenv";
 // import { prisma } from "./lib/prisma";
 import { AppError } from "./lib/AppError";
 import errorHandler from "./middleware/errorHandler";
 import { Request, Response, NextFunction } from "express";
 import { ErrorCodes } from "shared";
-
-dotenv.config();
+import { env } from "./config/env";
 
 const app = express();
-const PORT = process.env.SERVER_PORT || 3000;
+const PORT = env.SERVER_PORT || 3000;
 
 app.use(express.json());
 
