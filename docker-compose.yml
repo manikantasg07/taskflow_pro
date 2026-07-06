@@ -7,16 +7,19 @@ services:
 
   server:
     build:
-      context: ./server
+      context: .
+      dockerfile: server/Dockerfile
     ports:
       - "${SERVER_PORT}:3000"
     volumes:
-      - ./server:/app
+      - ./server:/app/server
+      - /app/server/node_modules
+      - ./shared:/app/shared
       - /app/node_modules
     environment:
       NODE_ENV: ${NODE_ENV}
       DATABASE_URL: ${DATABASE_URL}
-      REDIS_URL: redis://redis:${REDIS_PORT}
+      REDIS_URL: ${REDIS_URL}
     depends_on:
       - redis
     restart: unless-stopped
