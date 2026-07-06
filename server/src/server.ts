@@ -5,6 +5,7 @@ import errorHandler from "./middleware/errorHandler";
 import { Request, Response, NextFunction } from "express";
 import { ErrorCodes } from "shared";
 import { env } from "./config/env";
+import { healthRouter } from "./routes/health";
 
 const app = express();
 const PORT = env.SERVER_PORT || 3000;
@@ -18,6 +19,8 @@ app.get("/", (_req: Request, res: Response) => {
 app.use((_req: Request, _res: Response, next: NextFunction) => {
   next(new AppError("Requested URL Not Found", 404, ErrorCodes.NOT_FOUND));
 });
+
+app.use("/health", healthRouter);
 
 app.use(errorHandler);
 
