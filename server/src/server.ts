@@ -12,7 +12,9 @@ import { swaggerSpec } from "./swagger";
 const app = express();
 const PORT = env.SERVER_PORT || 3000;
 
-app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(swaggerSpec));
+if (env.NODE_ENV === "development") {
+  app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(swaggerSpec));
+}
 
 app.use(express.json());
 
