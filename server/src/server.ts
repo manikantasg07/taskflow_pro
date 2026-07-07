@@ -6,21 +6,21 @@ import { Request, Response, NextFunction } from "express";
 import { ErrorCodes } from "shared";
 import { env } from "./config/env";
 import { healthRouter } from "./routes/health";
+import swaggerUI from "swagger-ui-express";
+import { swaggerSpec } from "./swagger";
 
 const app = express();
 const PORT = env.SERVER_PORT || 3000;
 
+app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(swaggerSpec));
+
 app.use(express.json());
 
-app.get("/", (_req: Request, res: Response) => {
-  res.json({ message: "TaskFlow API running" });
-});
+app.use("/health", healthRouter);
 
 app.use((_req: Request, _res: Response, next: NextFunction) => {
   next(new AppError("Requested URL Not Found", 404, ErrorCodes.NOT_FOUND));
 });
-
-app.use("/health", healthRouter);
 
 app.use(errorHandler);
 

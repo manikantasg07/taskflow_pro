@@ -1,35 +1,43 @@
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import { prisma } from "../lib/prisma";
 import { redis } from "../lib/redis";
 import { logger } from "../lib/logger";
 
-export const healthRouter = async (req: Request, res: Response) => {
-  let statuscode = 200;
+export const healthRouter = async (
+  req: Request,
+  res: Response,
+  _next: NextFunction,
+) => {
   const services = {
     database: "ok",
     redis: "ok",
   };
-  let status = "ok";
 
+  // check database
   try {
     await prisma.$queryRaw`SELECT 1`;
   } catch (error) {
     services.database = "error";
-    statuscode = 503;
-    status = "degraded";
-    logger.error(error);
+    logger.error("Database health check failed", { error });
   }
+
+  // check redis
   try {
+    if (redis.status !== "ready") {
+      throw new Error(`Redis not ready. Status: ${redis.status}`);
+    }
     await redis.ping();
   } catch (error) {
     services.redis = "error";
-    statuscode = 503;
-    status = "degraded";
-    logger.error(error);
+    logger.error("Redis health check failed", { error });
   }
-  return res.status(statuscode).json({
-    status,
-    timestamp: Date.now().toString(),
+
+  // determine overall status
+  const isHealthy = Object.values(services).every((s) => s === "ok");
+
+  return res.status(isHealthy ? 200 : 503).json({
+    status: isHealthy ? "ok" : "degraded",
+    timestamp: new Date().toISOString(),
     services,
   });
 };

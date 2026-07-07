@@ -7,7 +7,9 @@ class RedisClient {
 
   static getInstance() {
     if (!RedisClient.instance) {
-      RedisClient.instance = new Redis(env.REDIS_URL);
+      RedisClient.instance = new Redis(env.REDIS_URL, {
+        connectTimeout: 3000,
+      });
     }
     RedisClient.instance.on("error", function (error) {
       logger.error(error);
