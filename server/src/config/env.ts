@@ -9,7 +9,9 @@ const envSchema = z.object({
   SERVER_PORT: z.string().default("3000"),
   NODE_ENV: z.enum(["development", "production", "test"]),
   REDIS_URL: z.string().min(1),
-  SALT_ROUNDS: z.number().min(1),
+  SALT_ROUNDS: z.string().min(1),
+  ACCESS_TOKEN_EXPIRY: z.string().min(1),
+  REFRESH_TOKEN_EXPIRY: z.string().min(1),
 });
 
 const parsed = envSchema.safeParse(process.env);

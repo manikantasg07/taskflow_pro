@@ -4,3 +4,5 @@ build
 .env
 .env.local
 .env.production
+private.key
+private.key.pub
