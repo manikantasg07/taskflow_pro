@@ -8,6 +8,7 @@ import { env } from "./config/env";
 import { healthRouter } from "./routes/health";
 import swaggerUI from "swagger-ui-express";
 import { swaggerSpec } from "./swagger";
+import { authRouter } from "./routes/auth";
 
 const app = express();
 const PORT = env.SERVER_PORT || 3000;
@@ -17,6 +18,8 @@ if (env.NODE_ENV === "development") {
 }
 
 app.use(express.json());
+
+app.use("/auth", authRouter);
 
 app.use("/health", healthRouter);
 

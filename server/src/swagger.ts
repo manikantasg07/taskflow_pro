@@ -31,9 +31,18 @@ const swaggerDefinition = {
             example: false,
           },
           error: {
-            message: "string",
-            code: "string",
-            statusCode: "string",
+            type: "object",
+            properties: {
+              message: {
+                type: "string",
+              },
+              code: {
+                type: "string",
+              },
+              statusCode: {
+                type: "number",
+              },
+            },
           },
         },
       },
@@ -70,11 +79,12 @@ const swaggerDefinition = {
   },
 };
 
-const options = {
+// ✅ apis only in options, not in swaggerDefinition
+const options: swaggerJSDoc.Options = {
   swaggerDefinition,
   apis: [
     path.join(__dirname, "./routes/*.ts"),
-    path.join(__dirname, "./server.ts"),
+    path.join(__dirname, "./controllers/*.ts"),
   ],
 };
 

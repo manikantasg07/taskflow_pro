@@ -8,7 +8,7 @@ type Payload = {
   email: string;
 };
 
-export const getAccessToken = async (payload: Payload) => {
+export const getAccessToken = (payload: Payload) => {
   const signingOptions = {
     issuer: "taskflow-pro",
     subject: payload.id,
@@ -23,7 +23,7 @@ export const getAccessToken = async (payload: Payload) => {
   return token;
 };
 
-export const getRefreshToken = async (payload: Payload) => {
+export const getRefreshToken = (payload: Payload) => {
   const signingOptions = {
     issuer: "taskflow-pro",
     subject: payload.id,
