@@ -1,5 +1,5 @@
 import { key } from "./privatekey";
-import jwt from "jsonwebtoken";
+import jwt, { SignOptions } from "jsonwebtoken";
 import { env } from "../config/env";
 
 type Payload = {
@@ -9,7 +9,7 @@ type Payload = {
 };
 
 export const getAccessToken = (payload: Payload) => {
-  const signingOptions = {
+  const signingOptions: SignOptions = {
     issuer: "taskflow-pro",
     subject: payload.id,
     audience: "taskflow-pro-client",
@@ -24,7 +24,7 @@ export const getAccessToken = (payload: Payload) => {
 };
 
 export const getRefreshToken = (payload: Payload) => {
-  const signingOptions = {
+  const signingOptions: SignOptions = {
     issuer: "taskflow-pro",
     subject: payload.id,
     audience: "taskflow-pro-client",
