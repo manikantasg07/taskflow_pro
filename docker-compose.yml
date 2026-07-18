@@ -20,6 +20,10 @@ services:
       NODE_ENV: ${NODE_ENV}
       DATABASE_URL: ${DATABASE_URL}
       REDIS_URL: redis://redis:6379
+      SALT_ROUNDS: ${SALT_ROUNDS}                
+      ACCESS_TOKEN_EXPIRY: ${ACCESS_TOKEN_EXPIRY}
+      REFRESH_TOKEN_EXPIRY: ${REFRESH_TOKEN_EXPIRY}
+      PRIVATE_KEY_ENCODED: ${PRIVATE_KEY_ENCODED}
     depends_on:
       - redis
     restart: unless-stopped

@@ -23,6 +23,7 @@ const envSchema = z.object({
   SALT_ROUNDS: z.string().min(1),
   ACCESS_TOKEN_EXPIRY: stringValueSchema,
   REFRESH_TOKEN_EXPIRY: stringValueSchema,
+  PRIVATE_KEY_ENCODED: z.string().min(1),
 });
 
 const parsed = envSchema.safeParse(process.env);
